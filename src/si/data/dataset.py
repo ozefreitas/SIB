@@ -64,32 +64,37 @@ class Dataset:
         return self.X.shape[0]
 
     def hasLabel(self):
-        """Returns True if the dataset contains labels (a dependent variable)"""
-        pass
+        """Returns True if the dataset constains labels (a dependent variable)"""
+        return self.Y is not None
 
     def getNumFeatures(self):
-        """Returns the number of features"""
-        pass
+        """Returns the number of features (numero de colunas de X)"""
+        return self.X.shape[1]
+
 
     def getNumClasses(self):
         """Returns the number of label classes or 0 if the dataset has no dependent variable."""
-        pass
+        unique = np.unique(self.Y, return_counts=False)
+        return len(unique) if self.hasLabel() else 0
 
     def writeDataset(self, filename, sep=","):
         """Saves the dataset to a file
-
         :param filename: The output file path
         :type filename: str
         :param sep: The fields separator, defaults to ","
         :type sep: str, optional
         """
-
         fullds = np.hstack((self.X, self.Y.reshape(len(self.Y), 1)))
         np.savetxt(filename, fullds, delimiter=sep)
 
     def toDataframe(self):
         """ Converts the dataset into a pandas DataFrame"""
-        pass
+        import pandas as pd
+        if self.Y is None:
+            dataset = pd.DataFrame(self.X.copy(), columns=self._xnames[:])
+        else:
+            dataset = pd.DataFrame(np.hstack((self.X, self.Y.reshape(len(self.Y), 1))), columns=np.hstack((self._xnames, self._yname)))
+        return dataset
 
     def getXy(self):
         return self.X, self.Y

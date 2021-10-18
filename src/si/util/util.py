@@ -26,10 +26,31 @@ def label_gen(n):
 
 def summary(dataset, format='df'):
     """ Returns the statistics of a dataset(mean, std, max, min)
-
     :param dataset: A Dataset object
     :type dataset: si.data.Dataset
     :param format: Output format ('df':DataFrame, 'dict':dictionary ), defaults to 'df'
     :type format: str, optional
     """
-    pass
+    if dataset.hasLabel():
+        data = np.hstack((dataset.X,dataset.Y.reshape(len(dataset.Y))))
+        names= [dataset._xnames,dataset._yname]
+    else:
+        data = np.hstack((dataset.X, dataset.Y.reshape(len(dataset.Y))))
+        names = [dataset._xnames]
+    mean = np.mean(data, axis=0)
+    var = np.var(data, axis=0)
+    maxi = np.max(data, axis=0)
+    mini = np.min(data, axis=0)
+    stats = {}
+    for i in range(data.shape[1]):
+        stat = {'mean' : mean[i]
+                ,'var' : var[i]
+                ,'max' : maxi[i]
+                ,'min' : mini[i]}
+        stats[names[i]] = stat
+    if format == 'df':
+        import pandas as pd
+        df= pd.DataFrame(stats)
+        return df
+    else:
+        return stats
