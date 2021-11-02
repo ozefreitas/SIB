@@ -1,4 +1,5 @@
 import itertools
+import numpy as np
 
 # Y is reserved to idenfify dependent variables
 ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXZ'

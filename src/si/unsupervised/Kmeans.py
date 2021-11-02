@@ -7,11 +7,11 @@
 
 # 1º - ou centralizar: X.np.mean(k,) ou usar o standardScaler
 
-import data.dataset
+from src.si. data import Dataset
 import pandas as np
 
 
-class Kmeans:
+class KMeans:
     def __init__(self, k: int, max_iterations=100):
         self.k = k
         self.n = max_iterations
