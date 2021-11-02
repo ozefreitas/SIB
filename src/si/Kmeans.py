@@ -47,7 +47,7 @@ class Kmeans:
         changed = True
         count = 0
         old_idxs = np.zeros(x.shape[0])
-        while changed == True or count < self.n:
+        while changed is True or count < self.n:
             idxs = np.apply_along_axis(self.get_closest_centroid(x), axis=0, arr=True)
             cent = [np.mean(x[idxs == 1]) for i in range(x.shape[0])]
             old_idxs = idxs
@@ -56,3 +56,5 @@ class Kmeans:
 
     def fit_transform(self, dataset):
         pass
+
+
