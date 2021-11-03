@@ -31,7 +31,7 @@ class PCA:
 
     def explained_variance(self, dataset):
         self.sorted_eigenvalue_sub = self.sorted_eigenvalue[0:self.numcomps]
-        return np.sum(self.sorted_eigenvalue_sub), self.sorted_eigenvalue
+        return np.sum(self.sorted_eigenvalue_sub), self.sorted_eigenvalue_sub
 
     def fit_transform(self, dataset):
         data_reduced = self.transform(dataset)

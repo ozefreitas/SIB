@@ -21,7 +21,7 @@ class VarianceThreshold:
         X = dataset.X
         self.var = np.var(X, axis=0)
 
-    def transform(self, dataset, inline = False):
+    def transform(self, dataset, inline=False):
         X = dataset.X
         cond = self.var > self.threshold
         ind = []
@@ -39,3 +39,4 @@ class VarianceThreshold:
     def fit_transform(self,dataset, inline=False):
         self.fit(dataset)
         return self.transform(dataset, inline)
+
