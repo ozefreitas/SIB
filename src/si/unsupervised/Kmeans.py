@@ -58,11 +58,13 @@ class KMeans:
         while changed is True or count < self.n:
             idxs = np.apply_along_axis(self.get_closest_centroid(x), axis=0, arr=True)
             cent = [np.mean(x[idxs == 1]) for i in range(x.shape[0])]
+            self.centroides = np.array(cent)
+
             old_idxs = idxs
             count += 1
-        return old_idxs
+        return self.centroides, old_idxs
 
     def fit_transform(self, dataset):
-        pass
-
-
+        self.fit(dataset)
+        centroides, indices = self.transform(dataset)
+        return centroides, indices

@@ -36,6 +36,6 @@ class VarianceThreshold:
         else:
             return Dataset(X_trans, copy(dataset.Y), xnames, copy(dataset._yname))
 
-    def fit_transform(self,dataset, inline = False):
+    def fit_transform(self,dataset, inline=False):
         self.fit(dataset)
         return self.transform(dataset, inline)
