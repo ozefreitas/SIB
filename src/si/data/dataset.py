@@ -1,5 +1,5 @@
 import numpy as np
-from si.util.util import label_gen
+from src.si.util.util import label_gen
 
 __all__ = ['Dataset']
 
