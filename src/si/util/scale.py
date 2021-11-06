@@ -86,10 +86,11 @@ class StandardScaler:
         -------
         Dataset object
         """
-        volta = dataset.X * np.sqrt(self.var) + self.mean
+        volta = (dataset.X.transpose() * np.sqrt(self.var)).transpose() + self.mean
+        norm = (volta.transpose() + self.mean).transpose()
         if inline:
-            dataset.X = volta
+            dataset.X = norm
             return dataset
         else:
-            return Dataset(volta, copy(dataset.Y), copy(dataset._xnames), copy(dataset._yname))
+            return Dataset(norm, copy(dataset.Y), copy(dataset._xnames), copy(dataset._yname))
 
