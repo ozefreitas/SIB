@@ -3,8 +3,9 @@ from src.si.util.scale import StandardScaler
 
 
 class PCA:
-    def __init__(self, num_components=2):
+    def __init__(self, num_components=2, using="svd"):
         self.numcomps = num_components
+        self.alg = using
 
 #    def fit(self, dataset):  # objeto Dataset
 #        pass

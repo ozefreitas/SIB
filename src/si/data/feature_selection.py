@@ -44,19 +44,39 @@ class VarianceThreshold:
 
 
 class SelectKBest:
-    def __init__(self, k, funcao_score = "f_regress"):
+    def __init__(self, k, funcao_score="f_regress"):
         self.feat_num = k
-        self.function = funcao_score
+        if funcao_score == "f_regress":
+            self.function = f_regress
+        self.fscore = None
+        self.pvalue = None
 
     def fit(self, dataset):
-        pass
+        self.fscore, self.pvalue = self.function(dataset)
 
-    def transform(self, dataset):
-        pass
+    def transform(self, dataset, inline=False):
+        X = copy(dataset.X)
+        xnames = copy(dataset._xnames)
+        sel_list = np.argsort(self.fscore)[-self.feat_num:]
+        featdata = X[:, sel_list]
+        featnames = [xnames[index] for index in sel_list]
+        if inline:
+            dataset.X = featdata
+            dataset._xnames = featnames
+            return dataset
+        else:
+            return Dataset(featdata, copy(dataset.Y), featnames, copy(dataset._yname))
 
-    def fit_transform(self, dataset):
-        pass
+    def fit_transform(self, dataset, inline=False):
+        self.fit(dataset)
+        return self.transform(dataset, inline=inline)
 
 
-def f_regress(self):
-    pass
+def f_regress(self, dataset):
+    X, y = dataset.getXy()
+    args = []
+    for k in np.unique(y):
+        args.append(X[y == k, :])
+    from scipy.stats import f_oneway
+    F_stat, pvalue = f_oneway(*args)
+    return F_stat, pvalue
