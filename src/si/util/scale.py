@@ -1,9 +1,12 @@
 import numpy as np
 from copy import copy
-from ..data import Dataset
+from ..data.dataset import Dataset
 
 
 class StandardScaler:
+    def __init__(self):
+        self.mean = None
+        self.var = None
     """
     Standardize features by centering the mean to 0 and unit variance.
     The standard score of an instance is calculated by:
@@ -28,8 +31,8 @@ class StandardScaler:
         ----------
         dataset : A Dataset OBJECT to be standardized
         """
-        self.mean = np.mean(dataset.X, axis=1)
-        self.var = np.var(dataset.X, axis=1)
+        self.mean = np.mean(dataset.X, axis=1)  # aplicar a média no eixo 1 (em cada linha
+        self.var = np.var(dataset.X, axis=1)  # aplicar a média no eixo 1 (em cada linha
 
     def transform(self, dataset, inline=False):
         """
@@ -37,19 +40,21 @@ class StandardScaler:
         standard deviation calculated during fitting.
         Parameters
         ----------
+        :param dataset: A Dataset object to be standardized
         :param inline:
-        dataset : A Dataset object to be standardized
         Returns
         -------
         A Dataset object with standardized data.
-
         """
-        Z = (dataset.X - self.mean)/np.sqrt(self.var)
+        menosmedia = (dataset.X.transpose() - self.mean).transpose()  # media de cada linha calculada em fit, tem que ser subtraida a cada valor da linha correspondente
+        # print(menosmedia.shape)
+        Z = (menosmedia.transpose()/self.var).transpose()  # a variancia segue o mesmo raciocino que a média
+        # Z = (dataset.X - self.mean)/np.sqrt(self.var)
         if inline:
             dataset.X = Z
             return dataset
         else:
-            return Dataset(Z, copy(dataset.Y), copy(dataset.xnames), copy(dataset.ynames))
+            return Dataset(Z, copy(dataset.Y), copy(dataset._xnames), copy(dataset._yname))
 
     def fit_transform(self, dataset, inline=False):
         """
@@ -57,7 +62,8 @@ class StandardScaler:
         standardize the data.
         Parameters
         ----------
-        dataset : A Dataset object to be standardized
+        :param dataset : A Dataset object to be standardized
+        :param inline:
         Returns
         -------
         A Dataset object to with standardized data.
@@ -74,7 +80,8 @@ class StandardScaler:
         where s is the standard deviation, and u is the mean.
         Parameters
         ----------
-        dataset : A standardized Dataset object
+        :param dataset : A standardized Dataset object
+        :param inline:
         Returns
         -------
         Dataset object
@@ -84,4 +91,5 @@ class StandardScaler:
             dataset.X = volta
             return dataset
         else:
-            return Dataset(volta, copy(dataset.Y), copy(dataset.xnames), copy(dataset.ynames))
+            return Dataset(volta, copy(dataset.Y), copy(dataset._xnames), copy(dataset._yname))
+

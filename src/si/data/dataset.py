@@ -18,7 +18,8 @@ class Dataset:
     def from_data(cls, filename, sep=",", labeled=True):
         """Creates a DataSet from a data file.
 
-        :param labeled:
+        :param labeled: if file contains row labels, defalts to True
+        :type labeled: bool
         :param filename: The filename
         :type filename: str
         :param sep: attributes separator, defaults to ","
@@ -26,13 +27,14 @@ class Dataset:
         :return: A DataSet object
         :rtype: DataSet
         """
-        data = np.genfromtxt(filename, delimiter=sep)
-        if labeled:
-            X = data[:, 0:-1]
-            Y = data[:, -1]
-        else:
-            X = data
-            Y = None
+        data = np.genfromtxt(filename, delimiter=sep)  # retorna uma matriz numpy, onde se pode extrair
+        # print(data)
+        if labeled:  # se tiver labels
+            X = data[:, 0:-1]  # os dados serão todos os extraídos, exceto a ultima coluna
+            Y = data[:, -1]  # a ultima coluna são as labels dos dados
+        else:  # se não tiver labels
+            X = data  # então todos os dados extraídos são dados da tabela
+            Y = None  # e não temos labels
         return cls(X, Y)
 
     @classmethod
@@ -57,7 +59,6 @@ class Dataset:
             xnames = df.columns.tolist()
             ynames = None
         return cls(X, Y, xnames, ynames)
-
 
     def __len__(self):
         """Returns the number of data points."""
@@ -131,8 +132,3 @@ def summary(dataset, format='df'):
         return df
     else:
         return stats
-
-
-dataseteste = Dataset.from_data("C:/Users/Ze/Desktop/Mestrado/3ºSemestre/si/datasets/breast-bin.data")
-print(dataseteste.Y)
-print(dataseteste.X)

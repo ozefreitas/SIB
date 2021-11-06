@@ -15,13 +15,11 @@ def label_gen(n):
             for s in itertools.product(ALPHA, repeat=size):
                 yield "".join(s)
             size += 1
-
     generator = _iter_all_strings()
 
     def gen():
         for s in generator:
             return s
-
     return [gen() for _ in range(n)]
 
 
@@ -33,7 +31,7 @@ def summary(dataset, format='df'):
     :type format: str, optional
     """
     if dataset.hasLabel():
-        data = np.hstack((dataset.X,dataset.Y.reshape(len(dataset.Y))))
+        data = np.hstack((dataset.X, dataset.Y.reshape(len(dataset.Y))))
         names= [dataset._xnames,dataset._yname]
     else:
         data = np.hstack((dataset.X, dataset.Y.reshape(len(dataset.Y))))
@@ -44,10 +42,10 @@ def summary(dataset, format='df'):
     mini = np.min(data, axis=0)
     stats = {}
     for i in range(data.shape[1]):
-        stat = {'mean' : mean[i]
-                ,'var' : var[i]
-                ,'max' : maxi[i]
-                ,'min' : mini[i]}
+        stat = {'mean': mean[i]
+                , 'var': var[i]
+                , 'max': maxi[i]
+                , 'min': mini[i]}
         stats[names[i]] = stat
     if format == 'df':
         import pandas as pd

@@ -28,3 +28,5 @@ class TestLabeledDataset(TestUnlabeledDataset):
         from src.si.data import Dataset
         self.filename = "datasets/lr-example1.data"
         self.dataset = Dataset.from_data(self.filename, labeled=True)
+
+
