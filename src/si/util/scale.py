@@ -1,6 +1,5 @@
 import numpy as np
 from copy import copy
-from ..data.dataset import Dataset
 
 
 class StandardScaler:
@@ -31,8 +30,8 @@ class StandardScaler:
         ----------
         dataset : A Dataset OBJECT to be standardized
         """
-        self.mean = np.mean(dataset.X, axis=1)  # aplicar a média no eixo 1 (em cada linha
-        self.var = np.var(dataset.X, axis=1)  # aplicar a média no eixo 1 (em cada linha
+        self.mean = np.mean(dataset.X, axis=0)  # aplicar a média no eixo 1 (em cada linha)
+        self.var = np.var(dataset.X, axis=0)  # aplicar a média no eixo 1 (em cada linha)
 
     def transform(self, dataset, inline=False):
         """
@@ -46,14 +45,12 @@ class StandardScaler:
         -------
         A Dataset object with standardized data.
         """
-        menosmedia = (dataset.X.transpose() - self.mean).transpose()  # media de cada linha calculada em fit, tem que ser subtraida a cada valor da linha correspondente
-        # print(menosmedia.shape)
-        Z = (menosmedia.transpose()/self.var).transpose()  # a variancia segue o mesmo raciocino que a média
-        # Z = (dataset.X - self.mean)/np.sqrt(self.var)
+        Z = (dataset.X - self.mean)/np.sqrt(self.var)
         if inline:
             dataset.X = Z
             return dataset
         else:
+            from src.si.data import Dataset
             return Dataset(Z, copy(dataset.Y), copy(dataset._xnames), copy(dataset._yname))
 
     def fit_transform(self, dataset, inline=False):
@@ -86,11 +83,11 @@ class StandardScaler:
         -------
         Dataset object
         """
-        volta = (dataset.X.transpose() * np.sqrt(self.var)).transpose() + self.mean
-        norm = (volta.transpose() + self.mean).transpose()
+        volta = (dataset.X * np.sqrt(self.var)) + self.mean
         if inline:
-            dataset.X = norm
+            dataset.X = volta
             return dataset
         else:
-            return Dataset(norm, copy(dataset.Y), copy(dataset._xnames), copy(dataset._yname))
+            from src.si.data import Dataset
+            return Dataset(volta, copy(dataset.Y), copy(dataset._xnames), copy(dataset._yname))
 

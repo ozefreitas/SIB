@@ -1,7 +1,7 @@
 import numpy as np
 from src.si.util.util import label_gen
 
-__all__ = ['Dataset']
+__all__ = ['Dataset', "summary"]
 
 
 class Dataset:
@@ -72,7 +72,6 @@ class Dataset:
         """Returns the number of features (numero de colunas de X)"""
         return self.X.shape[1]
 
-
     def getNumClasses(self):
         """Returns the number of label classes or 0 if the dataset has no dependent variable."""
         unique = np.unique(self.Y, return_counts=False)
@@ -97,6 +96,9 @@ class Dataset:
             dataset = pd.DataFrame(np.hstack((self.X, self.Y.reshape(len(self.Y), 1))), columns=np.hstack((self._xnames, self._yname)))
         return dataset
 
+    def getXy(self):
+        return self.X, self.Y
+
 
 def summary(dataset, format='df'):
     """ Returns the statistics of a dataset(mean, std, max, min)
@@ -106,7 +108,7 @@ def summary(dataset, format='df'):
     :type format: str, optional
     """
     if dataset.hasLabel():
-        fullds = np.hstack((dataset.X, dataset.y.reshape(len(dataset.y), 1)))
+        fullds = np.hstack((dataset.X, dataset.Y.reshape(len(dataset.Y), 1)))
         columns = dataset._xnames[:] + [dataset._yname]
     else:
         fullds = dataset.X

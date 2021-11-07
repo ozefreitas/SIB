@@ -72,7 +72,7 @@ class SelectKBest:
         return self.transform(dataset, inline=inline)
 
 
-def f_regress(self, dataset):
+def f_regress(dataset):
     X, y = dataset.getXy()
     args = []
     for k in np.unique(y):
