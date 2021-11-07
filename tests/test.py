@@ -6,7 +6,7 @@ import numpy as np
 from src.si.data.dataset import Dataset, summary
 dataseteste = Dataset.from_data("C:/Users/Ze/Desktop/Mestrado/3ºSemestre/si/datasets/breast-bin.data")
 print(dataseteste.Y)
-print(dataseteste.X)
+print(type(dataseteste.X))
 # teste
 print(dataseteste.X - 1)
 
