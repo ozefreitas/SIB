@@ -8,7 +8,7 @@
 # 1º - ou centralizar: X.np.mean(k,) ou usar o standardScaler
 
 from src.si.util.util import euclidean, manhattan
-from src.si. data import Dataset
+from src.si.data import Dataset
 import numpy as np
 
 
@@ -19,26 +19,26 @@ class KMeans:
         self.centroides = None
         self.measure = measure
 
-#   def distance_12(self, x, y):
-#       """
-#       Distancia euclidiana distance
-#       :param x:
-#       :param y:
-#       :return:
-#       """
-#       dist = np.absolute((x - y) ** 2).sum(axis=1)
-#       return dist
+    #   def distance_12(self, x, y):
+    #       """
+    #       Distancia euclidiana distance
+    #       :param x:
+    #       :param y:
+    #       :return:
+    #       """
+    #       dist = np.absolute((x - y) ** 2).sum(axis=1)
+    #       return dist
 
     def fit(self, dataset):
-        self.min = np.min(dataset.X)
-        self.max = np.max(dataset.X)
+        self.min = np.min(dataset.X, axis=0)  # fazer a média em relação às features
+        self.max = np.max(dataset.X, axis=0)
 
     def init_centroids(self, dataset):
         x = dataset.X
-#         self.centroides = np.array([np.random.uniform(low=self.min[i], high=self.max[i], size=(self.k,))
-#                                     for i in range(x.shape[1])])
-        rng = np.random.default_rng()
-        self.centroides = rng.choice(x, size=self.k, replace=False, p=None, axis=0)
+        centroides = []
+        for i in range(x.shape[1]):
+            centroides.append(np.random.uniform(low=self.min[i], high=self.max[i], size=(self.k,)))
+        self.centroides = np.array(centroides).transpose()
 
     def get_closest_centroid(self, x):
         if self.measure is "euclidean":
@@ -56,7 +56,7 @@ class KMeans:
         count = 0
         old_idxs = np.zeros(x.shape[0])
         while changed is True or count < self.n:
-            idxs = np.apply_along_axis(self.get_closest_centroid(x), axis=0, arr=True)
+            idxs = np.apply_along_axis(self.get_closest_centroid, axis=0, arr=x.transpose())
             cent = [np.mean(x[idxs == i]) for i in range(x.shape[0])]
             self.centroides = np.array(cent)
             changed = np.all(old_idxs == idxs)

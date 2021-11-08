@@ -10,9 +10,10 @@ class PCA:
     def transform(self, dataset):  # objeto Dataset
         scaler = StandardScaler()
         x_scaled = scaler.fit_transform(dataset)  # standardização dos dados usando o StandardScaler
-        # print(x_scaled.X.shape)
-        # print(x_scaled.X.ndim)
-        self.eigen_vectors, self.eigen_values, vt = np.linalg.svd(x_scaled.X)
+        X = x_scaled.X
+        XT = X.transpose()
+        print(XT)
+        self.eigen_vectors, self.eigen_values, vt = np.linalg.svd(XT)
         # sort the eigenvalues in descending order
         self.sorted_index = np.argsort(self.eigen_values)[::-1]  # devolve os indices de acordo com a importância dos valores por ordem crescente
         self.sorted_eigenvalue = self.eigen_values[self.sorted_index]  # ordernar os valores de acordo com os indices anteriores
@@ -22,17 +23,8 @@ class PCA:
         # select the first n eigenvectors, n is desired dimension of our final reduced data.
         # you can select any number of components.
         eigenvector_subset = sorted_eigenvectors[:, 0:self.numcomps]  # apenas devolve o numero de colunas que queremos
-        print(eigenvector_subset)
-        # print(x_scaled.X.shape)
-        x_reduced = np.dot(eigenvector_subset.transpose(), x_scaled.X).transpose()
-
-        # create m x n Sigma matrix
-#         Sigma = np.zeros((x_scaled.X.shape[0], x_scaled.X.shape[1]))
-#         # populate Sigma with n x n diagonal matrix
-#         Sigma[:x_scaled.X.shape[1], :x_scaled.X.shape[1]] = np.diag(self.eigen_values)
-#         # reconstruct matrix
-#         x_reduced = self.eigen_vectors.dot(Sigma.dot(vt))
-        return eigenvector_subset
+        x_reduced = np.dot(eigenvector_subset.transpose(), XT).transpose()
+        return x_reduced
 
     def variance_explained(self):
         somapercent = np.sum(self.sorted_eigenvalue)
