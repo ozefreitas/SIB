@@ -55,12 +55,21 @@ def summary(dataset, format='df'):
         return stats
 
 
-def euclidean(x, y):
+def euclidean(x, y):  # distancia de um ponto a um conjunto de pontos
     dist = np.sqrt(np.sum((x-y)**2, axis=1))
     return dist
 
 
-def manhattan(x, y):
+def manhattan(x, y):  # mesmo que euclidean
     dist = np.abs(x - y)
     dist = np.sum(dist)
     return dist
+
+
+def accuracy_score(pred, real):
+    score = 0
+    for i in range(len(pred)):
+        if pred[i] == real[i]:
+            score += 1
+    final_score = score / len(pred)
+    return final_score

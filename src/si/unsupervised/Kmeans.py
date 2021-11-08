@@ -31,7 +31,7 @@ class KMeans:
     #       return dist
 
     def fit(self, dataset):
-        self.min = np.min(dataset.X, axis=0)  # fazer a média em relação às features
+        self.min = np.min(dataset.X, axis=0)  # em relação às features
         self.max = np.max(dataset.X, axis=0)
 
     def init_centroides(self, dataset):
