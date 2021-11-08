@@ -1,5 +1,6 @@
 import itertools
 import numpy as np
+from src.si.data.dataset import Dataset
 
 # Y is reserved to idenfify dependent variables
 ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXZ'
@@ -73,3 +74,14 @@ def accuracy_score(pred, real):
             score += 1
     final_score = score / len(pred)
     return final_score
+
+
+def train_test_split(dataset, split=0.8):
+    x = dataset.X
+    n = x.shape[0]  # tamanho do dataset
+    m = split*n  # número da samples a ficar no train
+    arr = np.arange(n)
+    np.random.shuffle(arr)
+    train = Dataset(x[arr[:m]], dataset.Y[arr[:m]], dataset._xnames, dataset._yname)
+    test = Dataset(x[arr[m:]], dataset.Y[arr[m:]], dataset._xnames, dataset._yname)
+    return train, test

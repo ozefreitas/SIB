@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from src.si.util.util import euclidean, accuracy_score
 import numpy as np
 
+
 class Model(ABC):
     def __init__(self):
         self.is_fited = False
@@ -9,7 +10,6 @@ class Model(ABC):
     @abstractmethod
     def fit(self, dataset):
         raise NotImplementedError
-        pass
 
     @abstractmethod
     def predict(self, x):
@@ -21,7 +21,7 @@ class Model(ABC):
 
 class KNN(Model):
 
-    def __init__(self, num_neigbours, classification=True):
+    def __init__(self, num_neigbours, classification=True):  # numero de pontos aos quais serão calculadas as distancias
         super().__init__()
         self.k = num_neigbours
         self.classification = classification
