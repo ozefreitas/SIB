@@ -30,8 +30,8 @@ class StandardScaler:
         ----------
         dataset : A Dataset OBJECT to be standardized
         """
-        self.mean = np.mean(dataset.X, axis=0)  # aplicar a média no eixo 1 (em cada linha)
-        self.var = np.var(dataset.X, axis=0)  # aplicar a média no eixo 1 (em cada linha)
+        self.mean = np.mean(dataset.X, axis=0)  # aplicar a média no eixo 1 (em cada coluna)
+        self.var = np.var(dataset.X, axis=0)  # aplicar a média no eixo q (em cada coluna)
 
     def transform(self, dataset, inline=False):
         """
