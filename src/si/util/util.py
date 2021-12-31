@@ -1,11 +1,10 @@
 import itertools
 import numpy as np
-from src.si.data.dataset import Dataset
 
 # Y is reserved to idenfify dependent variables
 ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXZ'
 
-__all__ = ['label_gen', 'summary', "euclidean", "manhattan"]
+__all__ = ['label_gen', 'summary', "euclidean", "manhattan", "accuracy_score", "train_test_split", "mse"]
 
 
 def label_gen(n):
@@ -67,21 +66,24 @@ def manhattan(x, y):  # mesmo que euclidean
     return dist
 
 
-def accuracy_score(pred, real):
-    score = 0
-    for i in range(len(pred)):
-        if pred[i] == real[i]:
-            score += 1
-    final_score = score / len(pred)
-    return final_score
-
-
 def train_test_split(dataset, split=0.8):
     x = dataset.X
     n = x.shape[0]  # tamanho do dataset
-    m = split*n  # número da samples a ficar no train
-    arr = np.arange(n)
-    np.random.shuffle(arr)
+    m = int(split*n)  # número da samples a ficar no train
+    # print(m)
+    arr = np.arange(n)  # em forma de array
+    # print(arr)
+    np.random.shuffle(arr)  # randomize dos indices
+    # print("depois de aplicado o random:", arr)
+    from src.si.data.dataset import Dataset
     train = Dataset(x[arr[:m]], dataset.Y[arr[:m]], dataset._xnames, dataset._yname)
     test = Dataset(x[arr[m:]], dataset.Y[arr[m:]], dataset._xnames, dataset._yname)
     return train, test
+
+
+def sigmoide(z):
+    return 1/(1+np.exp(-z))
+
+
+def add_intersect(X):
+    return np.hstack((np.ones((X.shape[0], 1)), X))
