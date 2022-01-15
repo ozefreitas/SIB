@@ -10,7 +10,6 @@ class LogisticRegression(Model):
         self.epochs = epochs
         self.lr = lr
 
-
     def fit(self, dataset):
         X, Y = dataset.getXy()
         X = np.hstack((np.ones((X.shape[0], 1)), X))
@@ -60,9 +59,11 @@ class LogisticRegression(Model):
 
 
 class LogisticRegressionReg(LogisticRegression):
-    def __init__(self, epochs = 1000, lr=0.1, lbd = 1):
-        super(LogisticRegressionReg, self).__init__(epochs=epochs, lr=lr)
+    def __init__(self, epochs = 1000, lr=0.1, lbd=1):
+        super(LogisticRegressionReg, self).__init__()
         self.lbd = lbd
+        self.epochs = epochs
+        self.lr = lr
 
     def train_gd(self, X, Y):
         m = X.shape[0]
