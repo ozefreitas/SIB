@@ -47,8 +47,10 @@ class LinearRegression(Model):
 
 
 class LinearRegressionReg(LinearRegression):
-    def __init__(self, gd=False, epochs=1000, lr=0.001, lbd=1):
-        super(LinearRegressionReg, self).__init__(gd=gd, epochs=epochs, lr=lr)
+    def __init__(self, gd=False, epochs=1000, lbd=1):
+        super(LinearRegressionReg, self).__init__()
+        self.gd = gd
+        self.num_iterations = epochs
         self.lbd = lbd
 
     def train_closed(self, X, Y):
