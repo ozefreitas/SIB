@@ -1,6 +1,5 @@
-from src.si.util.util import train_test_split,add_intersect
+from src.si.util.util import train_test_split, add_intersect
 import numpy as np
-import itertools
 
 
 class CrossValidationScore:
