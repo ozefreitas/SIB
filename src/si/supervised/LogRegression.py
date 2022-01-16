@@ -59,7 +59,7 @@ class LogisticRegression(Model):
 
 
 class LogisticRegressionReg(LogisticRegression):
-    def __init__(self, epochs = 1000, lr=0.1, lbd=1):
+    def __init__(self, epochs=1000, lr=0.1, lbd=1):
         super(LogisticRegressionReg, self).__init__()
         self.lbd = lbd
         self.epochs = epochs
