@@ -20,6 +20,7 @@ class Layer(ABC):
 
 class Dense(Layer):
     def __init__(self, inputsize, outputsize):
+        super().__init__()
         self.weights = np.random.rand(inputsize, outputsize) - 0.5
         self.bias = np.zeros((1, outputsize))
 
@@ -46,6 +47,7 @@ class Dense(Layer):
 
 class Activation(Layer):
     def __init__(self, activation):
+        super().__init__()
         self.function = activation
 
     def forward(self,input):
@@ -59,6 +61,7 @@ class Activation(Layer):
 
 class NN(Model):
     def __init__(self, epochs=1000, lr=0.001, verbose=True):
+        super().__init__()
         self.epochs = epochs
         self.lr = lr
         self.verbose = verbose
@@ -117,7 +120,8 @@ class Flatten(Layer):
 
 
 class Conv2D(Layer):
-    def __init__(self, input_shape,kernel_shape, layer_depth, stride = 1, padding = 0):
+    def __init__(self, input_shape, kernel_shape, layer_depth, stride=1, padding=0):
+        super().__init__()
         self.input_shape = input_shape
         self.in_ch = input_shape[2]
         self.out_ch = layer_depth
@@ -172,13 +176,17 @@ class Conv2D(Layer):
 # fazer pol
 
 
-class Poling2D(Model):
+class Pooling2D(Model):
     def __init__(self, size, stride):
+        super().__init__()
         self.size = size
         self.stride = stride
 
-    def pool(self):
-        pass
+    def pool(self, x_col):
+        raise NotImplementedError
+
+    def dpool(self, dx_col, dout_col, cache):
+        raise NotImplementedError
 
     def forward(self, input):
         self.X_shape = input.shape

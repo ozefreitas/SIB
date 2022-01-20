@@ -1,6 +1,7 @@
 from src.si.util.util import train_test_split, add_intersect
 import numpy as np
 import itertools
+import pandas as pd
 
 
 class CrossValidation:
@@ -10,7 +11,7 @@ class CrossValidation:
         self.score = score
         self.cv = kwargs.get('cv', 3)
         self.split = kwargs.get('split', 0.8)
-        self.train_scores=None
+        self.train_scores = None
         self.test_scores = None
         self.ds = None
 
@@ -32,14 +33,15 @@ class CrossValidation:
     def toDataframe(self):
         import pandas as pd
         assert self.train_scores and self.test_scores, 'need to run model'
-        return pd.DataFrame({'train Scores':self.train_scores, 'Test Scores': self.test_scores})
+        return pd.DataFrame({'train Scores': self.train_scores, 'Test Scores': self.test_scores})
 
 
 class GridSearchCV:
 
-    def __init__(self, model, dataset, parameters, **kwargs):
+    def __init__(self, model, dataset, parameters, score=None, **kwargs):
         self.model = model
         self.dataset = dataset
+        self.score = score
         hasparam = (hasattr(self.model, param) for param in parameters)
         if np.all(hasparam):
             self.parameters = parameters
@@ -57,28 +59,15 @@ class GridSearchCV:
         for conf in itertools.product(*values):
             for i in range(len(attrs)):
                 setattr(self.model, attrs[i], conf[i])
-            scores = CrossValidationScore(self.model, self.dataset, **self.kwargs).run()
-            self.results.append((conf, scores))
+            scores = CrossValidationScore(self.model, self.dataset, self.score, **self.kwargs)
+            self.results.append((scores.run()))
         return self.results
 
     def toDataframe(self):
-        import pandas as pd
-        assert self.results, "The grid search needs to be ran."
-        data = dict()
-        for i, k in enumerate(self.parameters.keys()):
-            v = []
-            for r in self.results:
-                v.append(r[0][i])
-            data[k] = v
-        for i in range(len(self.results[0][1][0])):
-            treino = []
-            teste = []
-            for r in self.results:
-                treino.append(r[1][0][i])
-                teste.append(r[1][1][i])
-            treino = data['Train ' + str(i + 1)]
-            teste = data['Test ' + str(i + 1)]
-        return pd.DataFrame(data)
+        assert self.results, "Need to run trainning before hand"
+        n_cv = len(self.results[0][0])
+        data = np.hstack((np.array([res[0] for res in self.results]), np.array([res[1] for res in self.results])))
+        return pd.DataFrame(data=data, columns=[f"CV_{i+1} train" for i in range(n_cv)]+[f"CV_{i+1} test" for i in range(n_cv)])
 
 
 class CrossValidationScore:
@@ -97,7 +86,6 @@ class CrossValidationScore:
         train_score = []
         test_score = []
         ds = []
-        true_Y, pred_Y = [], []
         for _ in range(self.cv):
             train, test = train_test_split(self.dataset, self.split)
             ds.append((train, test))
@@ -105,19 +93,14 @@ class CrossValidationScore:
             if not self.score:
                 train_score.append(self.model.cost())
                 test_score.append(self.model.cost(test.X, test.Y))
-                pred_Y.extend(list(self.model.predict(test.X)))  #
             else:
-                y_train = np.ma.apply_along_axis(self.model.predict, axis=0, arr=train.X.T)
+                y_train = np.ma.apply_along_axis(self.model.predict, axis=1, arr=train.X)
                 train_score.append(self.score(train.Y, y_train))
-                y_test = np.ma.apply_along_axis(self.model.predict, axis=0, arr=test.X.T)
+                y_test = np.ma.apply_along_axis(self.model.predict, axis=1, arr=test.X)
                 test_score.append(self.score(test.Y, y_test))
-                pred_Y.extend(list(y_test))
-            true_Y.extend(list(test.Y))
         self.train_score = train_score
         self.test_score = test_score
         self.ds = ds
-        self.true_Y = np.array(true_Y)
-        self.pred_Y = np.array(pred_Y)
         return train_score, test_score
 
     def toDataframe(self):
