@@ -1,10 +1,12 @@
 import itertools
 import numpy as np
+import pandas as pd
+
 
 # Y is reserved to idenfify dependent variables
 ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXZ'
 
-__all__ = ['label_gen', 'summary', "euclidean", "manhattan", "train_test_split", "sigmoide", "add_intersect"]
+__all__ = ['label_gen', 'summary', "euclidean", "manhattan", "train_test_split", "sigmoide", "add_intersect", "confusion_matrix"]
 
 
 def label_gen(n):
@@ -118,3 +120,18 @@ def minibatch(X, batchsize=256, shuffle=True):
             yield ix[i * batchsize: (i + 1) * batchsize]
 
     return mb_generator(),
+
+
+def confusion_matrix(y_true, y_pred):
+    """
+    Computes a dataframe of predicted and true values
+    Parameters
+    :param numpy.array y_true: array-like of shape (n_samples,)
+        Ground truth (correct) target values.
+    :param numpy.array y_pred: array-like of shape (n_samples,)
+        Estimated target values.
+    :return: pandas.DataFrame conf_matrix: dataframe-like of shape (2,2)
+        Countdown of how many predicted values correspond to the true values
+    """
+    conf_matrix = pd.crosstab(y_true, y_pred, rownames=["True"], colnames=["Predicted"], margins=True)
+    return conf_matrix
