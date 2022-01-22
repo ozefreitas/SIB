@@ -1,6 +1,3 @@
-from abc import ABC
-
-import numpy as np
 from src.si.util.activation import *
 from src.si.util.metrics import mse, mse_prime
 from src.si.supervised.Modelo import Model
@@ -96,7 +93,7 @@ class NN(Model):
         print("\r", f"epoch {epoch + 1}/{self.epochs} error = {err}")
         self.is_fited = True
 
-    def predict(self,input_data):
+    def predict(self, input_data):
         assert self.is_fited
         output = input_data
         for layer in self.layers:
@@ -184,6 +181,8 @@ class MaxPooling(Layer):
         self.pool_size = pool_size  # na forma de tuplo (int, int)
         self.stride = stride
         self.cache = {}
+        self.X_copy = None
+        self.X_shape = None
 
     def pool(self, x_col):
         raise NotImplementedError
@@ -192,6 +191,20 @@ class MaxPooling(Layer):
         raise NotImplementedError
 
     def forward(self, input):
+        # n, h, w, d = input.shape  # comprimento, altura e numero das imagens
+        # h_out = (h - self.size) / self.stride + 1
+        # w_out = (w - self.size) / self.stride + 1
+        # if not w_out.is_intiger() or not h_out.is_intiger():
+        #     raise Exception("Invalid output dimension")
+        # h_out, w_out = int(h_out), int(w_out)
+        # X_reshaped = input.reshape()
+        # self.X_col = im2col(X_reshaped, self.size, pad=0, stride=self.stride)
+
+        # out, self.max_idx = self.pool(self.X_col)
+        # out = out.reshape(h_out, w_out, n, d)
+        # out = out.transpose(3, 2, 0, 1)
+        # return out
+        self.X_copy = np.array(input, copy=True)
         self.X_shape = input.shape
         n, h, w, d = input.shape  # numero de imagens, height (comprimento), width (largura) e camadas (depth)
         height_pool, width_pool = self.pool_size
@@ -212,14 +225,27 @@ class MaxPooling(Layer):
                 output[:, i, j, :] = np.max(a_prev_slice, axis=(1, 2))
         return output
 
-    def backward(self, output_error, learning_rate):
-        n, w, h, d = self.X_shape
-        dX_col = np.zeros_like(self.X_col)
-        dout_col = output_error.transpose(2, 3, 0, 1).ravel()
-        dX = self.dpool(dX_col, dout_col, self.max_idx)
-        dX = col2im(dX_col, (n*d, h, w, 1), self.pool_size, pad=0, stride=self.stride)
-        dX = dX.reshape(self.X_shape)
-        return dX
+    def backward(self, output_error, lr):
+        # n, w, h, d = self.X_shape
+        # dX_col = np.zeros_like(self.X_col)
+        # dout_col = output_error.transpose(2, 3, 0, 1).ravel()
+        # dX = self.dpool(dX_col, dout_col, self.max_idx)
+        # dX = col2im(dX_col, (n*d, h, w, 1), self.pool_size, pad=0, stride=self.stride)
+        # dX = dX.reshape(self.X_shape)
+        # return dX
+        output = np.zeros_like(self.X_copy)
+        _, h_out, w_out, _ = output_error.shape
+        h_pool, w_pool = self.pool_size
+
+        for i in range(h_out):
+            for j in range(w_out):
+                h_start = i * self.stride
+                h_end = h_start + h_pool
+                w_start = j * self.stride
+                w_end = w_start + w_pool
+                output[:, h_start:h_end, w_start:w_end, :] += \
+                    output_error[:, i:i + 1, j:j + 1, :] * self.cache[(i, j)]
+        return output_error
 
     def save_mask(self, x, cords):
         mask = np.zeros_like(x)
