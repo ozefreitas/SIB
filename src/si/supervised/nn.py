@@ -1,3 +1,5 @@
+from abc import ABC
+
 import numpy as np
 from src.si.util.activation import *
 from src.si.util.metrics import mse, mse_prime
@@ -50,7 +52,7 @@ class Activation(Layer):
         super().__init__()
         self.function = activation
 
-    def forward(self,input):
+    def forward(self, input):
         self.input = input
         self.output = self.function(input)
         return self.output
@@ -78,7 +80,7 @@ class NN(Model):
         self.history = dict()
         for epoch in range(self.epochs):
             output = X
-            #forward propagation
+            # forward propagation
             for layer in self.layers:
                 output = layer.forward(output)
 
@@ -110,7 +112,7 @@ class NN(Model):
 
 
 class Flatten(Layer):
-    def forward(self,input):
+    def forward(self, input):
         self.input_shape= input.shape
         output = input.reshape(input.shape[0], -1)
         return output
@@ -128,12 +130,12 @@ class Conv2D(Layer):
         self.stride = stride
         self.padding = padding
 
-        self.weights = np.random.rand(kernel_shape[0],kernel_shape[1],
-                                      self.in_ch, self.out_ch) -0.5
+        self.weights = np.random.rand(kernel_shape[0], kernel_shape[1],
+                                      self.in_ch, self.out_ch) - 0.5
 
         self.bias = np.zeros((self.out_ch,1))
 
-    def forward(self,input_data):
+    def forward(self, input_data):
         s = self.stride
         self.X_shape = input_data.shape
         _, p = pad2D(input_data, self.padding, self.weights.shape[:2], s)
@@ -173,14 +175,15 @@ class Conv2D(Layer):
 
         return input_error
 
-# fazer pol
+# fazer pooling
 
 
-class Pooling2D(Model):
-    def __init__(self, size, stride):
+class MaxPooling(Layer):
+    def __init__(self, pool_size, stride=2):
         super().__init__()
-        self.size = size
+        self.pool_size = pool_size  # na forma de tuplo (int, int)
         self.stride = stride
+        self.cache = {}
 
     def pool(self, x_col):
         raise NotImplementedError
@@ -190,25 +193,69 @@ class Pooling2D(Model):
 
     def forward(self, input):
         self.X_shape = input.shape
-        n, h, w, d = input.shape  # comprimento, altura e numero das imagens
-        h_out = (h - self.size) / self.stride + 1
-        w_out = (w - self.size) / self.stride + 1
+        n, h, w, d = input.shape  # numero de imagens, height (comprimento), width (largura) e camadas (depth)
+        height_pool, width_pool = self.pool_size
+        h_out = 1 + (h - height_pool) // self.stride  # comprimento do kernel depois de fazer o pooling
+        w_out = 1 + (w - width_pool) // self.stride  # largura do kernel depois de fazer o pooling
         if not w_out.is_intiger() or not h_out.is_intiger():
             raise Exception("Invalid output dimension")
         h_out, w_out = int(h_out), int(w_out)
-        X_reshaped = input.reshape()
-        self.X_col = im2col(X_reshaped, self.size, pad=0, stride=self.stride)
-
-        out, self.max_idx = self.pool(self.X_col)
-        out = out.reshape(h_out, w_out, n, d)
-        out = out.transpose(3, 2, 0, 1)
-        return out
+        output = np.zeros((n, h_out, w_out, d))
+        for i in range(h_out):
+            for j in range(w_out):
+                h_start = i * self.stride
+                h_end = h_start + height_pool
+                w_start = j * self.stride
+                w_end = w_start + width_pool
+                a_prev_slice = input[:, h_start:h_end, w_start:w_end, :]
+                self.save_mask(x=a_prev_slice, cords=(i, j))
+                output[:, i, j, :] = np.max(a_prev_slice, axis=(1, 2))
+        return output
 
     def backward(self, output_error, learning_rate):
         n, w, h, d = self.X_shape
         dX_col = np.zeros_like(self.X_col)
         dout_col = output_error.transpose(2, 3, 0, 1).ravel()
         dX = self.dpool(dX_col, dout_col, self.max_idx)
-        dX = col2im(dX_col, (n*d, h, w, 1), self.size, pad=0, stride=self.stride)
+        dX = col2im(dX_col, (n*d, h, w, 1), self.pool_size, pad=0, stride=self.stride)
         dX = dX.reshape(self.X_shape)
         return dX
+
+    def save_mask(self, x, cords):
+        mask = np.zeros_like(x)
+        n, h, w, c = x.shape
+        x = x.reshape(n, h * w, c)
+        idx = np.argmax(x, axis=1)
+
+        n_idx, c_idx = np.indices((n, c))
+        mask.reshape(n, h * w, c)[n_idx, idx, c_idx] = 1
+        self.cache[cords] = mask
+
+
+class AvgPooling(MaxPooling, ABC):
+    def __init__(self, pool_size, stride=2):
+        super().__init__()
+        self.pool_size = pool_size  # na forma de tuplo (int, int)
+        self.stride = stride
+        self.cache = {}
+
+    def forward(self, input):
+        self.X_shape = input.shape
+        n, h, w, d = input.shape  # numero de imagens, height (comprimento), width (largura) e camadas (depth)
+        height_pool, width_pool = self.pool_size
+        h_out = 1 + (h - height_pool) // self.stride  # comprimento do kernel depois de fazer o pooling
+        w_out = 1 + (w - width_pool) // self.stride  # largura do kernel depois de fazer o pooling
+        if not w_out.is_intiger() or not h_out.is_intiger():
+            raise Exception("Invalid output dimension")
+        h_out, w_out = int(h_out), int(w_out)
+        output = np.zeros((n, h_out, w_out, d))
+        for i in range(h_out):
+            for j in range(w_out):
+                h_start = i * self.stride
+                h_end = h_start + height_pool
+                w_start = j * self.stride
+                w_end = w_start + width_pool
+                a_prev_slice = input[:, h_start:h_end, w_start:w_end, :]
+                self.save_mask(x=a_prev_slice, cords=(i, j))
+                output[:, i, j, :] = np.mean(a_prev_slice, axis=(1, 2))
+        return output
