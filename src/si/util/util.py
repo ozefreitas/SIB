@@ -6,7 +6,8 @@ import pandas as pd
 # Y is reserved to idenfify dependent variables
 ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXZ'
 
-__all__ = ['label_gen', 'summary', "euclidean", "manhattan", "train_test_split", "sigmoide", "add_intersect", "confusion_matrix"]
+__all__ = ['label_gen', 'summary', "euclidean", "manhattan", "train_test_split", "sigmoide", "add_intersect",
+           "confusion_matrix", "to_categorical"]
 
 
 def label_gen(n):

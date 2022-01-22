@@ -172,8 +172,6 @@ class Conv2D(Layer):
 
         return input_error
 
-# fazer pooling
-
 
 class MaxPooling(Layer):
     def __init__(self, pool_size, stride=2):
@@ -264,6 +262,8 @@ class AvgPooling(MaxPooling, ABC):
         self.pool_size = pool_size  # na forma de tuplo (int, int)
         self.stride = stride
         self.cache = {}
+        self.X_copy = None
+        self.X_shape = None
 
     def forward(self, input):
         self.X_shape = input.shape
@@ -283,5 +283,5 @@ class AvgPooling(MaxPooling, ABC):
                 w_end = w_start + width_pool
                 a_prev_slice = input[:, h_start:h_end, w_start:w_end, :]
                 self.save_mask(x=a_prev_slice, cords=(i, j))
-                output[:, i, j, :] = np.mean(a_prev_slice, axis=(1, 2))
+                output[:, i, j, :] = np.mean(a_prev_slice, axis=(1, 2))  # mudar a função, em vez de dar return ao maior valor dentro do array, devolve a média
         return output
