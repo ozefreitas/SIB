@@ -75,16 +75,18 @@ class NN(Model):
         X, Y = dataset.getXy()
         self.dataset = dataset
         self.history = dict()
-        for epoch in range(self.epochs):
+        for epoch in range(self.epochs):  # cada apoch corre a rede toda, o forward e backward de todas as camadas
             output = X
             # forward propagation
-            for layer in self.layers:
-                output = layer.forward(output)
+            for layer in self.layers:  # para cada uma das camadas que tenham sido adicionadas
+                print(layer)
+                output = layer.forward(output)  # corre o forward_pass com o output da camada anterior
 
             # backward propagation
-            error = self.loss_prime(Y, output)
-            for layer in reversed(self.layers):
-                error = layer.backward(error, self.lr)
+            error = self.loss_prime(Y, output)  # primeiro erro calculado a partir do output da ultima camada
+            for layer in reversed(self.layers):  # começa pela ultima camada adicionada
+                print(layer)
+                error = layer.backward(error, self.lr)  # e
 
             err = self.loss(Y, output)
             self.history[epoch] = err
@@ -208,8 +210,8 @@ class MaxPooling(Layer):
         height_pool, width_pool = self.pool_size
         h_out = 1 + (h - height_pool) // self.stride  # comprimento do kernel depois de fazer o pooling
         w_out = 1 + (w - width_pool) // self.stride  # largura do kernel depois de fazer o pooling
-        if not w_out.is_intiger() or not h_out.is_intiger():
-            raise Exception("Invalid output dimension")
+        # if not w_out.is_intiger() or not h_out.is_intiger():
+        #    raise Exception("Invalid output dimension")
         h_out, w_out = int(h_out), int(w_out)
         output = np.zeros((n, h_out, w_out, d))
         for i in range(h_out):
