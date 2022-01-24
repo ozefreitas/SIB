@@ -3,7 +3,7 @@ import numpy as np
 
 
 def majority(values):
-    return max(set(values), key=values.count)
+    return max(set(values), key=values.count)  # retorna o value que aparece mais vezes
 
 
 def average(values):
@@ -13,22 +13,22 @@ def average(values):
 class Ensemble(Model):
     def __init__(self, models, fvote, score):
         super().__init__()
-        self.models = models
-        self.fvote = fvote
+        self.models = models  # modelos já inicializados
+        self.fvote = fvote  # função para ranking das predictions
         self.score = score
 
     def fit(self, dataset):  # vai fazer fit dos modelos
         self.dataset = dataset
         for model in self.models:
-            model.fit(dataset)
+            model.fit(dataset)  # faz o fitting do dataset para todos os modelos dados
         self.is_fited = True
 
     def predict(self, x):
         assert self.is_fited
         preds = []
         for model in self.models:
-            preds.append(model.predict(x))
-        vote = self.fvote(preds)
+            preds.append(model.predict(x))  # faz o predict para cada modelo
+        vote = self.fvote(preds)  # retorna o maior valor
         return vote
 
     def cost(self, X=None, Y=None):
