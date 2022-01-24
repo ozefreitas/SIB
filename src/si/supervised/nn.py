@@ -54,8 +54,8 @@ class Activation(Layer):
         self.output = self.function(input)
         return self.output
 
-    def backward(self,output_error, lr):
-        return np.multiply(self.function.prime(self.input),output_error)
+    def backward(self, output_error, lr):
+        return np.multiply(self.function.prime(self.input), output_error)
 
 
 class NN(Model):
@@ -79,14 +79,14 @@ class NN(Model):
             output = X
             # forward propagation
             for layer in self.layers:  # para cada uma das camadas que tenham sido adicionadas
-                print(layer)
+                # print(layer)
                 output = layer.forward(output)  # corre o forward_pass com o output da camada anterior
 
             # backward propagation
             error = self.loss_prime(Y, output)  # primeiro erro calculado a partir do output da ultima camada
             for layer in reversed(self.layers):  # começa pela ultima camada adicionada
-                print(layer)
-                error = layer.backward(error, self.lr)  # e
+                # print(layer)
+                error = layer.backward(error, self.lr)  # calcula o erro da camada anterior a partir da camada atual
 
             err = self.loss(Y, output)
             self.history[epoch] = err
@@ -243,9 +243,8 @@ class MaxPooling(Layer):
                 h_end = h_start + h_pool
                 w_start = j * self.stride
                 w_end = w_start + w_pool
-                output[:, h_start:h_end, w_start:w_end, :] += \
-                    output_error[:, i:i + 1, j:j + 1, :] * self.cache[(i, j)]
-        return output_error
+                output[:, h_start:h_end, w_start:w_end, :] += output_error[:, i:i + 1, j:j + 1, :] * self.cache[(i, j)]
+        return output
 
     def save_mask(self, x, cords):
         mask = np.zeros_like(x)
