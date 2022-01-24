@@ -71,6 +71,10 @@ class NN(Model):
     def add(self, layer):
         self.layers.append(layer)
 
+    def use(self, loss=None, loss_prime=None):
+        self.loss = loss
+        self.loss_prime = loss_prime
+
     def fit(self, dataset):
         X, Y = dataset.getXy()
         self.dataset = dataset
@@ -207,13 +211,13 @@ class MaxPooling(Layer):
         self.X_copy = np.array(input, copy=True)
         self.X_shape = input.shape
         n, h, w, d = input.shape  # numero de imagens, height (comprimento), width (largura) e camadas (depth)
-        height_pool, width_pool = self.pool_size
-        h_out = 1 + (h - height_pool) // self.stride  # comprimento do kernel depois de fazer o pooling
-        w_out = 1 + (w - width_pool) // self.stride  # largura do kernel depois de fazer o pooling
+        height_pool, width_pool = self.pool_size  # comprimento e largura do kernel
+        h_out = 1 + (h - height_pool) // self.stride  # comprimento da camada depois de fazer o pooling
+        w_out = 1 + (w - width_pool) // self.stride  # largura da camada depois de fazer o pooling
         # if not w_out.is_intiger() or not h_out.is_intiger():
         #    raise Exception("Invalid output dimension")
-        h_out, w_out = int(h_out), int(w_out)
-        output = np.zeros((n, h_out, w_out, d))
+        h_out, w_out = int(h_out), int(w_out)  # passar para inteiros
+        output = np.zeros((n, h_out, w_out, d))  # construir matriz de zeros com as dimensões finais da camada
         for i in range(h_out):
             for j in range(w_out):
                 h_start = i * self.stride
@@ -284,5 +288,6 @@ class AvgPooling(MaxPooling, ABC):
                 w_end = w_start + width_pool
                 a_prev_slice = input[:, h_start:h_end, w_start:w_end, :]
                 self.save_mask(x=a_prev_slice, cords=(i, j))
-                output[:, i, j, :] = np.mean(a_prev_slice, axis=(1, 2))  # mudar a função, em vez de dar return ao maior valor dentro do array, devolve a média
+                output[:, i, j, :] = np.mean(a_prev_slice, axis=(1, 2))  # mudar a função, em vez de dar return ao maior
+                # valor dentro do array, devolve a média
         return output
