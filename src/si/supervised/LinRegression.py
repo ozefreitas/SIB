@@ -69,7 +69,7 @@ class LinearRegressionReg(LinearRegression):  # para sobreajustamento
         lbds[0] = 0
         for epoch in range(self.num_iterations):
             grad = (X.dot(self.theta)-Y).dot(X)  # mesma que a de cima
-            self.theta -= (self.lr/m)*(lbds+grad)  # atualização dos valores de theta
+            self.theta -= (self.lr/m)*(lbds+grad)  # atualização dos valores de theta com parametro de regularização
             self.history[epoch] = [self.theta[:], self.cost()]  # guardar atualizações e erros a cada iteração
 
     def predict(self, X):

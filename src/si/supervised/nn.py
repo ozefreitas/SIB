@@ -96,7 +96,7 @@ class NN(Model):
             self.history[epoch] = err
             if self.verbose:
                 print(f"epoch {epoch+1}/{self.epochs} error={err}")
-        print("\r", f"epoch {epoch + 1}/{self.epochs} error = {err}")
+        print(f"epoch {epoch + 1}/{self.epochs} error = {err}")
         self.is_fited = True
 
     def predict(self, input_data):
@@ -180,7 +180,7 @@ class Conv2D(Layer):
 
 
 class MaxPooling(Layer):
-    def __init__(self, pool_size, stride=2):
+    def __init__(self, pool_size, stride=1):
         super().__init__()
         self.pool_size = pool_size  # na forma de tuplo (int, int)
         self.stride = stride
@@ -195,6 +195,7 @@ class MaxPooling(Layer):
         raise NotImplementedError
 
     def forward(self, input):
+
         # n, h, w, d = input.shape  # comprimento, altura e numero das imagens
         # h_out = (h - self.size) / self.stride + 1
         # w_out = (w - self.size) / self.stride + 1
@@ -208,26 +209,26 @@ class MaxPooling(Layer):
         # out = out.reshape(h_out, w_out, n, d)
         # out = out.transpose(3, 2, 0, 1)
         # return out
+
         self.X_copy = np.array(input, copy=True)
         self.X_shape = input.shape
         n, h, w, d = input.shape  # numero de imagens, height (comprimento), width (largura) e camadas (depth)
         height_pool, width_pool = self.pool_size  # comprimento e largura do kernel
         h_out = 1 + (h - height_pool) // self.stride  # comprimento da camada depois de fazer o pooling
         w_out = 1 + (w - width_pool) // self.stride  # largura da camada depois de fazer o pooling
-        # if not w_out.is_intiger() or not h_out.is_intiger():
-        #    raise Exception("Invalid output dimension")
+
         h_out, w_out = int(h_out), int(w_out)  # passar para inteiros
         output = np.zeros((n, h_out, w_out, d))  # construir matriz de zeros com as dimensões finais da camada
         for i in range(h_out):
             for j in range(w_out):
-                h_start = i * self.stride
+                h_start = i * self.stride  # faz a janela de onde depois vai retirar o valor máximo nete caso
                 h_end = h_start + height_pool
                 w_start = j * self.stride
                 w_end = w_start + width_pool
-                a_prev_slice = input[:, h_start:h_end, w_start:w_end, :]
-                self.save_mask(x=a_prev_slice, cords=(i, j))
-                output[:, i, j, :] = np.max(a_prev_slice, axis=(1, 2))
-        return output
+                a_prev_slice = input[:, h_start:h_end, w_start:w_end, :]  # slice da matriz inicial
+                self.save_mask(x=a_prev_slice, cords=(i, j))  # guarda a coordenada de onde tirou essa slice
+                output[:, i, j, :] = np.max(a_prev_slice, axis=(1, 2))  # retira o valor máximo da slice
+        return output  # retornando a matriz so com o valor máximo
 
     def backward(self, output_error, lr):
         # n, w, h, d = self.X_shape
@@ -237,8 +238,9 @@ class MaxPooling(Layer):
         # dX = col2im(dX_col, (n*d, h, w, 1), self.pool_size, pad=0, stride=self.stride)
         # dX = dX.reshape(self.X_shape)
         # return dX
-        output = np.zeros_like(self.X_copy)
-        _, h_out, w_out, _ = output_error.shape
+
+        output = np.zeros_like(self.X_copy)  # matriz de zeros do tamanho do input
+        _, h_out, w_out, _ = output_error.shape  # vai ser usado o comprimento e largura da matriz de erro
         h_pool, w_pool = self.pool_size
 
         for i in range(h_out):
@@ -247,10 +249,12 @@ class MaxPooling(Layer):
                 h_end = h_start + h_pool
                 w_start = j * self.stride
                 w_end = w_start + w_pool
+
+                # volta a aumentar o tamanho da matriz para a forma como estava antes de fazer o pooling
                 output[:, h_start:h_end, w_start:w_end, :] += output_error[:, i:i + 1, j:j + 1, :] * self.cache[(i, j)]
         return output
 
-    def save_mask(self, x, cords):
+    def save_mask(self, x, cords):  # função que vai guardar a coordenada de cada slice que é feita da matriz inicial
         mask = np.zeros_like(x)
         n, h, w, c = x.shape
         x = x.reshape(n, h * w, c)
@@ -276,8 +280,7 @@ class AvgPooling(MaxPooling, ABC):
         height_pool, width_pool = self.pool_size
         h_out = 1 + (h - height_pool) // self.stride  # comprimento do kernel depois de fazer o pooling
         w_out = 1 + (w - width_pool) // self.stride  # largura do kernel depois de fazer o pooling
-        if not w_out.is_intiger() or not h_out.is_intiger():
-            raise Exception("Invalid output dimension")
+
         h_out, w_out = int(h_out), int(w_out)
         output = np.zeros((n, h_out, w_out, d))
         for i in range(h_out):
