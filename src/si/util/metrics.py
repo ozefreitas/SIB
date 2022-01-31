@@ -18,6 +18,68 @@ def accuracy_score(y_true, y_pred):
     return accuracy
 
 
+def precision_score(y_true, y_pred, binary=True):
+    """
+    Classification performance metric that computes the precision of y_true
+    and y_pred.
+    :param numpy.array y_true: array-like of shape (n_samples,) Ground truth correct labels.
+    :param numpy.array y_pred: array-like of shape (n_samples,) Estimated target values.
+    :param bool binary: for problems with binary labels as positives (1) and negatives (0)
+    :returns: C (float) Precision score.
+    """
+    true_pos, false_pos = 0, 0
+    if binary:
+        for true, pred in zip(y_true, y_pred):
+            if true == pred:
+                true_pos += 1
+            if pred == 1 and true == 0:  # falsos positivos
+                false_pos += 1
+        precision = true_pos / (true_pos+false_pos)
+    else:
+        raise TypeError("Problem must be binary classification 0 and 1")
+    return precision
+
+
+def recall(y_true, y_pred, binary=True):
+    """
+    Classification performance metric that computes the recall of y_true
+    and y_pred.
+    :param numpy.array y_true: array-like of shape (n_samples,) Ground truth correct labels.
+    :param numpy.array y_pred: array-like of shape (n_samples,) Estimated target values.
+    :param bool binary: for problems with binary labels as positives (1) and negatives (0)
+    :returns: C (float) Recall score.
+    """
+    true_pos, false_neg = 0, 0
+    if binary:
+        for true, pred in zip(y_true, y_pred):
+            if true == pred:
+                true_pos += 1
+            if pred == 0 and true == 1:  # falsos positivos
+                false_neg += 1
+        rec = true_pos / (true_pos+false_neg)
+    else:
+        raise TypeError("Problem must be binary classification 0 and 1")
+    return rec
+
+
+def f1_score(y_true, y_pred, binary=True):
+    """
+    Classification performance metric that computes the F1 score of y_true
+    and y_pred.
+    :param numpy.array y_true: array-like of shape (n_samples,) Ground truth correct labels.
+    :param numpy.array y_pred: array-like of shape (n_samples,) Estimated target values.
+    :param bool binary: for problems with binary labels as positives (1) and negatives (0)
+    :returns: C (float) Precision score.
+    """
+    if binary:
+        precision = precision_score(y_true, y_pred, binary=binary)
+        rec = recall(y_true, y_pred, binary=binary)
+        f1 = 2 * (precision * rec) / (precision + rec)
+    else:
+        raise TypeError("Problem must be binary classification 0 and 1")
+    return f1
+
+
 def mse(y_true, y_pred, squared=True):
     """
     Mean squared error regression loss function.
