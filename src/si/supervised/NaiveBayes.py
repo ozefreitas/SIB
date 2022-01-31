@@ -1,38 +1,41 @@
 import math
+import numpy as np
 
 
 class NaiveBayes:
     def __init__(self, dataset):
-        self.by_label = {}
+        # self.by_label = {}
         self.dataset = dataset
 
     # def fit(self):
     #     self.sep_by_class(self.dataset)
 
-    def sep_by_class(self, dataset):
+    def sep_by_class(self, dataset):  # separa as linhas do dataset de acordo com a classe Y
+        by_label = {}
         X, y = dataset.getXy()
-        for row in range(len(y)):
-            if y[row] not in self.by_label:
-                self.by_label[y[row]] = []
-            self.by_label[y[row]].append(X[row])
-        return self.by_label
+        for row in range(len(y)):  # para todas as linhas
+            if y[row] not in by_label:  # se essa label ainda nao estiver no dicionário
+                by_label[y[row]] = []  # adiciona-se como key
+            by_label[y[row]].append(X[row])  # adiciona-se a linha à lista dessa label
+        return by_label
 
-    def mean(self, numbers):
+    def mean(self, numbers):  # faz a média de um conjunto de números em lista
         return sum(numbers) / float(len(numbers))
 
-    def stdev(self, numbers):
+    def stdev(self, numbers):  # faz o desvio padrao de uma conjunto de números em lista
         avg = self.mean(numbers)
         var = sum([(x - avg) ** 2 for x in numbers]) / float(len(numbers) - 1)
         return math.sqrt(var)
 
-    def summarize_dataset(self, dataset):
-        summaries = [(self.mean(column), self.stdev(column), len(column)) for column in zip(*dataset)]
+    def summarize_dataset(self, data):
+        summaries = [(self.mean(column), self.stdev(column), len(column)) for column in zip(*data)]
         del (summaries[-1])
         return summaries
 
     def summarize_by_class(self, dataset):
-        summ_per_class = self.sep_by_class(dataset)
-        for class_value, rows in self.by_label.items():
+        separated = self.sep_by_class(dataset)
+        summ_per_class = {}
+        for class_value, rows in separated.items():  # para cada label e todas as linhas de dados
             summ_per_class[class_value] = self.summarize_dataset(rows)
         return summ_per_class
 
@@ -59,10 +62,11 @@ class NaiveBayes:
                 best_label = class_value
         return best_label
 
-    def naive_bayes(self, train, test):
+    def run(self, train, test):
         summarize = self.summarize_by_class(train)
         predictions = list()
-        for row in test:
+        X, y = test.getXy()
+        for row in X:
             output = self.predict(summarize, row)
             predictions.append(output)
-        return predictions
+        return np.array(predictions)
