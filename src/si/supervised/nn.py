@@ -59,7 +59,7 @@ class Activation(Layer):
 
 
 class NN(Model):
-    def __init__(self, epochs=1000, lr=0.001, verbose=True):
+    def __init__(self, epochs=1000, lr=0.001, verbose=True, minibatch=False):
         super().__init__()
         self.epochs = epochs
         self.lr = lr
@@ -67,6 +67,7 @@ class NN(Model):
         self.layers = []
         self.loss = mse
         self.loss_prime = mse_prime
+        self.minibatch = minibatch
 
     def add(self, layer):
         self.layers.append(layer)
@@ -180,7 +181,7 @@ class Conv2D(Layer):
 
 
 class MaxPooling(Layer):
-    def __init__(self, pool_size, stride=1):
+    def __init__(self, pool_size, stride=2):
         super().__init__()
         self.pool_size = pool_size  # na forma de tuplo (int, int)
         self.stride = stride

@@ -110,17 +110,18 @@ def to_categorical(y, num_classes=None, dtype='float32'):
 
 def minibatch(X, batchsize=256, shuffle=True):
     N = X.shape[0]
-    ix = np.arange(N)
-    n_batches = int(np.ceil(N / batchsize))
+    ix = np.arange(N)  # colocar na forma de array igualmente espaçado desde 0 até o tamanho do dataset que é dado
+    n_batches = int(np.ceil(N / batchsize))  # dividindo o numero total de amostras pelo tamanho do batch, obtemos
+    # o número de bacthes que são precisos fazer para cobrir os dados todos
 
     if shuffle:
         np.random.shuffle(ix)
 
-    def mb_generator():
+    def mb_generator():  # gerador
         for i in range(n_batches):
-            yield ix[i * batchsize: (i + 1) * batchsize]
+            yield ix[i * batchsize: (i + 1) * batchsize]  # vai apenas retornar um valor por cada vez que se corre o gerador
 
-    return mb_generator(),
+    return mb_generator()
 
 
 def confusion_matrix(y_true, y_pred):
